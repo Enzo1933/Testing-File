@@ -14,9 +14,9 @@ R = 0.08     # radius at which wires are placed
 theta_w = np.linspace(0, 2*np.pi, n, endpoint=False)
 
 # Define your field grid
-x_vals = np.linspace(-0.1, 0.1, 100, dtype=np.float32)
-y_vals = np.linspace(-0.1, 0.1, 100, dtype=np.float32)
-z_vals = np.linspace(0, L, 100, dtype=np.float32)
+x_vals = np.linspace(-0.1, 0.1, 200, dtype=np.float32)
+y_vals = np.linspace(-0.1, 0.1, 200, dtype=np.float32)
+z_vals = np.linspace(0, L, 500, dtype=np.float32)
 X, Y, Z = np.meshgrid(x_vals, y_vals, z_vals, indexing='ij')
 
 # Initialize total field arrays
@@ -97,6 +97,23 @@ for j in range(n):
 
 # After processing all wires, we have the total B field:
 B_magnitude = np.sqrt(Bx_total**2 + By_total**2 + Bz_total**2)
+"""
+#test data for plotting
+
+x_vals = np.linspace(-0.1, 0.1, 100, dtype=np.float32)
+y_vals = np.linspace(-0.1, 0.1, 100, dtype=np.float32)
+L = 0.6096
+R=.08
+z_vals = np.linspace(0, L, 100, dtype=np.float32)
+X, Y, Z = np.meshgrid(x_vals, y_vals, z_vals, indexing='ij')
+
+Bx_total = -Y
+By_total = X
+Bz_total = np.zeros_like(X)
+
+B_magnitude = np.sqrt(Bx_total**2 + By_total**2 + Bz_total**2)
+
+"""
 
 # Bx_total, By_total, Bz_total, and B_magnitude are now computed without needing >32GB of RAM.
 print(B_magnitude[0,0,0])
@@ -105,12 +122,15 @@ Bx_plot=np.zeros_like(Bx_total) #initialize Bx_plot
 By_plot=np.zeros_like(By_total) #initialize By_plot
 Bx_plot[valid_mask] = Bx_total[valid_mask] / B_magnitude[valid_mask] #normalize for plotting and prevent div by 0
 By_plot[valid_mask] = By_total[valid_mask] / B_magnitude[valid_mask] #normalize for plotting and prevent div by 0
+mask_outside = (X**2+Y**2 > R**2)
+Bx_plot[mask_outside] = 0
+By_plot[mask_outside] = 0
 z_index = np.argmin(np.abs(z_vals - L/2))
 plt.figure(figsize=(8, 6))
 stride = 3
 plt.quiver(x_vals[::stride], y_vals[::stride], Bx_plot[::stride, ::stride, z_index],
            By_plot[::stride, ::stride, z_index], 
-           scale=0.05, scale_units='xy', linewidths=0.5)
+           scale=200, scale_units='xy', linewidths=0.5)
 plt.title(f'Magnetic Field at z = {z_vals[z_index]:.2f} m')
 plt.xlabel('x (m)')
 plt.ylabel('y (m)')
@@ -122,7 +142,7 @@ plt.axhline(0, color='red', linestyle='--', linewidth=1.5)
 plt.axvline(0, color='red', linestyle='--', linewidth=1.5)
 plt.axline((0, 0), slope=1, color='red', linestyle=':')
 plt.axline((0, 0), slope=-1, color='red', linestyle=':')
-plt.show(block=True)
 end_time = time.time()
 print(f"Time taken: {(end_time - start_time)/60:.2f} minutes")
-playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
+#playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
+plt.show()
