@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import playsound
+import scipy.interpolate as interpolate
+import scipy.constants as const
 start_time = time.time()
 mu_0 = 4 * np.pi * 1e-7
 
@@ -13,11 +15,11 @@ L = 0.6096   # wire length along z
 R = 0.08 # radius at which wires are placed
 R_domain = .076 #accelerator radius
 theta_w = np.linspace(0, 2*np.pi, n, endpoint=False)
-
+N_seg = 500   # number of segments per wire
 # Define your field grid
 x_vals = np.linspace(-0.1, 0.1, 200, dtype=np.float32)
 y_vals = np.linspace(-0.1, 0.1, 200, dtype=np.float32)
-z_vals = np.linspace(0, L, 500, dtype=np.float32)
+z_vals = np.linspace(0, L, N_seg, dtype=np.float32)
 X, Y, Z = np.meshgrid(x_vals, y_vals, z_vals, indexing='ij')
 
 # Initialize total field arrays
@@ -26,7 +28,7 @@ By_total = np.zeros_like(X, dtype=np.float32)
 Bz_total = np.zeros_like(X, dtype=np.float32)
 print("Total field arrays initialized")
 # Wire discretization settings
-N_seg = 500   # number of segments per wire
+
 batch_size = 50  # process segments in batches to save memory
 print("Wire loop parameterizations begins now")
 for j in range(n):
@@ -151,17 +153,18 @@ print(f"Time taken: {(end_time - start_time)/60:.2f} minutes")
 #playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
 plt.show()
 
-exit()
+
 #Part 2: Send particle flying upward
 
 #constants:
+charge=int(input("Enter charge of particle: "))
+phi=np.deg2rad(float(input("Enter initialangle of particle: ")))
 e=1.6*10**-19 #Elementary charge
 
 q=e*charge
-#F=qVBsin(phi), phi between z axis and velocity vector
 c=const.c
-Bx_interp = interpolate.RegularGridInterpolator((x_vals, y_vals, z_vals), Bx)
-By_interp = interpolate.RegularGridInterpolator((x_vals, y_vals, z_vals), By)
+Bx_interp = interpolate.RegularGridInterpolator((x_vals, y_vals, z_vals), Bx_total)
+By_interp = interpolate.RegularGridInterpolator((x_vals, y_vals, z_vals), By_total)
 #Iterate force, acceleration, velocity, and position over time in flight
 x_pos_list=[0]
 y_pos_list=[0]
