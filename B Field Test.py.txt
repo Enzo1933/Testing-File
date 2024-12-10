@@ -10,36 +10,28 @@ mu_0 = 4 * np.pi * 1e-7
 n = 8       # number of wires
 I = 10.0      # current in each wire, amps
 L = 0.6096   # wire length along z
-R = 0.08 #radius of the wire placement
-R_domain = .0762 # radius of the domain
+R = 0.08     # radius at which wires are placed
 theta_w = np.linspace(0, 2*np.pi, n, endpoint=False)
-N_seg = 500   # number of segments per wire
+
 # Define your field grid
 x_vals = np.linspace(-0.1, 0.1, 200, dtype=np.float32)
 y_vals = np.linspace(-0.1, 0.1, 200, dtype=np.float32)
-z_vals = np.linspace(0, L, N_seg, dtype=np.float32)
+z_vals = np.linspace(0, L, 500, dtype=np.float32)
 X, Y, Z = np.meshgrid(x_vals, y_vals, z_vals, indexing='ij')
 
 # Initialize total field arrays
 Bx_total = np.zeros_like(X, dtype=np.float32)
 By_total = np.zeros_like(X, dtype=np.float32)
 Bz_total = np.zeros_like(X, dtype=np.float32)
-print("Initialized total field arrays")
+print("Total field arrays initialized")
 # Wire discretization settings
-
+N_seg = 500   # number of segments per wire
 batch_size = 50  # process segments in batches to save memory
-print("Starting wire parameterization loop")
+print("Wire loop parameterizations begins now")
 for j in range(n):
     # Parameterize the j-th wire
     x_wire_pos = R * np.cos(theta_w[j])
     y_wire_pos = R * np.sin(theta_w[j])
-    plt.plot(x_wire_pos, y_wire_pos, 'bo')  # Plot each wire position as a blue dot
-    plt.axis('equal')  # Keep aspect ratio equal
-    plt.grid(True)
-    plt.xlabel('x (m)')
-    plt.ylabel('y (m)')
-    plt.title('Wire Positions in xy-plane')
-    
     z_start = 0.0
     z_end = L
 
@@ -61,12 +53,8 @@ for j in range(n):
     dl_x = dl[:, 0]
     dl_y = dl[:, 1]
     dl_z = dl[:, 2]
-    print(f"Processed wire {j} of {n}")
-    if j == n:
-        print("starting main Magnetic Field calculation loop")
-
+print("Main for loop begins now")
     # Process wire segments in batches to save memory
-   
     for seg_start in range(0, N_seg, batch_size):
         seg_end = min(seg_start + batch_size, N_seg)
 
@@ -106,15 +94,10 @@ for j in range(n):
         Bx_total += Bx_wire_batch
         By_total += By_wire_batch
         Bz_total += Bz_wire_batch
-        # Print progress every 50 iterations
-        if seg_start % (50 * batch_size) == 0:
-            print(f"Processed {seg_start} segments out of {N_seg}")
-plt.show()
-
 
 # After processing all wires, we have the total B field:
 B_magnitude = np.sqrt(Bx_total**2 + By_total**2 + Bz_total**2)
-print("Magnetic Vector Field Complete")
+print("Main for loop complete")
 """
 #test data for plotting
 
@@ -132,7 +115,7 @@ Bz_total = np.zeros_like(X)
 B_magnitude = np.sqrt(Bx_total**2 + By_total**2 + Bz_total**2)
 
 """
-print("Plotting Magnetic Field Now")
+
 # Bx_total, By_total, Bz_total, and B_magnitude are now computed without needing >32GB of RAM.
 print(B_magnitude[0,0,0])
 valid_mask = B_magnitude > 1e-25
@@ -140,7 +123,7 @@ Bx_plot=np.zeros_like(Bx_total) #initialize Bx_plot
 By_plot=np.zeros_like(By_total) #initialize By_plot
 Bx_plot[valid_mask] = Bx_total[valid_mask] / B_magnitude[valid_mask] #normalize for plotting and prevent div by 0
 By_plot[valid_mask] = By_total[valid_mask] / B_magnitude[valid_mask] #normalize for plotting and prevent div by 0
-mask_outside = (X**2+Y**2 > R_domain**2)
+mask_outside = (X**2+Y**2 > R**2)
 Bx_plot[mask_outside] = 0
 By_plot[mask_outside] = 0
 z_index = np.argmin(np.abs(z_vals - L/2))
@@ -154,7 +137,7 @@ plt.xlabel('x (m)')
 plt.ylabel('y (m)')
 plt.axis('equal')
 plt.savefig('B_field.png')
-circle = plt.Circle((0, 0), R_domain, color='red', fill=False, linestyle='--', linewidth=1.5)
+circle = plt.Circle((0, 0), R, color='red', fill=False, linestyle='--', linewidth=1.5)
 plt.gca().add_artist(circle)
 plt.axhline(0, color='red', linestyle='--', linewidth=1.5)
 plt.axvline(0, color='red', linestyle='--', linewidth=1.5)
