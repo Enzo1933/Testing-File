@@ -187,7 +187,7 @@ while z_pos <= L:
     z_pos_list.append(z_pos)
     x_pos_list.append(x_pos)
     y_pos_list.append(y_pos)
-    if r >= domain_radius:
+    if r >= R_domain:
         print("Particle left the accelerator radius.")
         break
     Bx = Bx_interp((x_pos, y_pos,z_pos))  # Get B components at particles' point
@@ -240,7 +240,7 @@ ax.set_ylabel('Y Position (m)')
 ax.set_zlabel('Z Position (m)')
 ax.set_title('3D Particle Trajectory')
 ax.set_xlim(-R_domain, R_domain)
-ax.set_ylim(-domain_radius, domain_radius)
+ax.set_ylim(-R_domain, R_domain)
 
 plt.show()
 
