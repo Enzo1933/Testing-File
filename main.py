@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-import playsound
+# import playsound
 
 start_time = time.time()
 mu_0 = 4 * np.pi * 1e-7
