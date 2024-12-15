@@ -1,7 +1,7 @@
 import numpy as np
 import time
 import scipy.constants as const
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import playsound
 
 start_time = time.time()
@@ -189,7 +189,7 @@ plt.axvline(0, color='red', linestyle='--', linewidth=1.5)
 plt.axline((0, 0), slope=1, color='red', linestyle=':')
 plt.axline((0, 0), slope=-1, color='red', linestyle=':')
 end_time = time.time()
-print("Simulation Complete",f"Total Time taken: {(end_time - start_time)/60:.2f} minutes")
+print("Simulation Complete",f"Total Time taken: {(end_time - start_time)/60:.2f}", "minutes", f"Hours: {(end_time - start_time)/(60**2):.2f}")
 playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
 plt.show()
 
