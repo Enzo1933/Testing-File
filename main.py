@@ -3,12 +3,13 @@ import time
 import scipy.constants as const
 import matplotlib.pyplot as plt
 import playsound
+from scipy import interpolate 
 
 start_time = time.time()
 mu_0 = 4 * np.pi * 1e-7
 
 # Example parameters
-n = 8        # number of wires
+n = 50        # number of wires
 I = 10.0     # current in each wire, amps
 L = 0.6096   # wire length along z
 R = 0.08     # radius at which wires are placed
@@ -72,7 +73,8 @@ chunk_size_z = 200
 x_size = x_vals.size
 y_size = y_vals.size
 z_size = z_vals.size
-
+# plt.scatter(x_mid_all,y_mid_all)
+# plt.show()
 print("Starting computation by z-chunks.", "Time:", time.time() - start_time)
 
 # Create the full XY grid once (x_size, y_size)
@@ -191,5 +193,94 @@ plt.axline((0, 0), slope=-1, color='red', linestyle=':')
 end_time = time.time()
 print("Simulation Complete",f"Total Time taken: {(end_time - start_time)/60:.2f}", "minutes", f"Hours: {(end_time - start_time)/(60**2):.2f}")
 playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
+plt.show()
+
+#Part 2: Send particle flying upward
+
+#constants:
+e=1.6*10**-19 #Elementary charge
+charge, phi = -1,np.deg2rad(5)
+q=e*charge
+#F=qVBsin(phi), phi between z axis and velocity vector
+c=const.c
+Bx_interp = interpolate.RegularGridInterpolator((x_vals, y_vals, z_vals), Bx_total)
+By_interp = interpolate.RegularGridInterpolator((x_vals, y_vals, z_vals), By_total)
+#Iterate force, acceleration, velocity, and position over time in flight
+x_pos_list=[0]
+y_pos_list=[0]
+z_pos_list=[0]
+r_pos=[0]
+theta=.5
+z_pos=0
+r=0
+x_pos=0
+y_pos=0
+vz=100000*np.cos(phi)
+vy=100000*np.sin(phi)*np.sin(theta)
+vx=100000*np.sin(phi)*np.cos(theta)
+m=1.67*10**-27
+dt=10**-9
+#r_pos=np.sqrt(x_pos**2+y_pos**2) #radial position -- this is what we care about
+
+while z_pos <= L:
+    r_pos.append(r)
+    z_pos_list.append(z_pos)
+    x_pos_list.append(x_pos)
+    y_pos_list.append(y_pos)
+    if r >= R_domain:
+        print("Particle left the accelerator radius.")
+        break
+    Bx = Bx_interp((x_pos, y_pos,z_pos))  # Get B components at particles' point
+    By = By_interp((x_pos, y_pos,z_pos))
+    fbx = -q * vz * By
+    fby = q * vz * Bx
+    fbz = q * (vx * By - vy * Bx)
+    if (abs(fbx<1e-25)):
+        fbx=0
+    if (abs(fby<1e-25)):
+        fby=0
+    if (abs(fbz<1e-25)):
+        fbz=0
+    ax = fbx / m
+    ay = fby / m
+    az = fbz / m
+    vx += ax * dt
+    vy += ay * dt
+    vz += az * dt
+    x_pos += vx * dt
+    y_pos += vy * dt
+    z_pos += vz * dt
+    r = np.sqrt(x_pos**2 + y_pos**2)
+    # print(x_pos, y_pos)
+    # print(vy)
+    # print(fby, ay)
+    # if len(z_pos) >= 200:
+    #     break
+    #print("fbx",fbx,"fby",fby,"fbz",fbz)
+  #print(Bx,By)
+
+
+
+
+
+plt.figure(figsize=(8, 6))
+plt.plot(r_pos, z_pos_list, marker='o', linestyle='-')
+plt.xlabel("Radius (m)")
+plt.ylabel("Z-position (m)")
+plt.title("Particle Trajectory in Accelerator")
+plt.grid(True)
+plt.show(block=False)
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(x_pos_list, y_pos_list, z_pos_list, c='r', marker='o', linewidth=0.25)
+ax.set_xlabel('X Position (m)')
+ax.set_ylabel('Y Position (m)') 
+ax.set_zlabel('Z Position (m)')
+ax.set_title('3D Particle Trajectory')
+ax.set_xlim(-R_domain, R_domain)
+ax.set_ylim(-R_domain, R_domain)
+
 plt.show()
 
