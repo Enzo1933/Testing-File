@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import logging
 import scipy.constants as const
 import matplotlib.pyplot as plt
 import playsound
@@ -10,12 +11,11 @@ mu_0 = 4 * np.pi * 1e-7
 
 # Example parameters
 n = 50        # number of wires
-I = 10.0     # current in each wire, amps
+I = 250.0     # current in each wire, amps
 L = 0.6096   # wire length along z
 R = 0.08     # radius at which wires are placed
 R_domain = .076 #Accelerator Radius
 N_seg = 500  # number of segments per wire
-
 theta_w = np.linspace(0, 2*np.pi, n, endpoint=False)
 
 # Define your field grid
@@ -73,6 +73,11 @@ chunk_size_z = 200
 x_size = x_vals.size
 y_size = y_vals.size
 z_size = z_vals.size
+# Logging setup
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+total_steps = n * (z_size // chunk_size_z)
+step_counter = 0
+last_logged_percent = -1  # Keeps track of the last percentage reported
 # plt.scatter(x_mid_all,y_mid_all)
 # plt.show()
 print("Starting computation by z-chunks.", "Time:", time.time() - start_time)
@@ -162,8 +167,14 @@ for z_start in range(0, z_size, chunk_size_z):
     Bx_total[:, :, z_start:z_end] = Bx_chunk
     By_total[:, :, z_start:z_end] = By_chunk
     Bz_total[:, :, z_start:z_end] = Bz_chunk
-    
-print("Computation complete!", "Total time:", (time.time() - start_time)/60, "minutes")
+    # Update progress and print every 1%
+    step_counter += 1
+    percent_complete = int((step_counter / total_steps) * 100)
+    if percent_complete > last_logged_percent:
+        print(f"Progress: {percent_complete}%")
+        last_logged_percent = percent_complete
+end_time1 = time.time() - start_time
+print("B Field Created!", "Time Taken:", (end_time1)/60, "minutes")
 B_magnitude= np.sqrt(Bx_total**2+By_total**2+Bz_total**2)
 valid_mask = B_magnitude > 1e-25
 Bx_plot=np.zeros_like(Bx_total) #initialize Bx_plot
@@ -190,8 +201,8 @@ plt.axhline(0, color='red', linestyle='--', linewidth=1.5)
 plt.axvline(0, color='red', linestyle='--', linewidth=1.5)
 plt.axline((0, 0), slope=1, color='red', linestyle=':')
 plt.axline((0, 0), slope=-1, color='red', linestyle=':')
-end_time = time.time()
-print("Simulation Complete",f"Total Time taken: {(end_time - start_time)/60:.2f}", "minutes", f"Hours: {(end_time - start_time)/(60**2):.2f}")
+end_time2 = time.time()-end_time1
+print("Simulation Complete",f"Time taken: {end_time2/60:.2f}", "minutes", f"Hours: {(end_time1)/(60**2):.2f}")
 playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
 plt.show()
 
@@ -221,7 +232,10 @@ vx=100000*np.sin(phi)*np.cos(theta)
 m=1.67*10**-27
 dt=10**-9
 #r_pos=np.sqrt(x_pos**2+y_pos**2) #radial position -- this is what we care about
-
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
+total_steps = n * (z_size // chunk_size_z)
+step_counter = 0
+last_logged_percent = -1 
 while z_pos <= L:
     r_pos.append(r)
     z_pos_list.append(z_pos)
@@ -251,6 +265,9 @@ while z_pos <= L:
     y_pos += vy * dt
     z_pos += vz * dt
     r = np.sqrt(x_pos**2 + y_pos**2)
+    if percent_complete > last_logged_percent:
+        print(f"Progress: {percent_complete}%")
+        last_logged_percent = percent_complete
     # print(x_pos, y_pos)
     # print(vy)
     # print(fby, ay)
@@ -258,8 +275,9 @@ while z_pos <= L:
     #     break
     #print("fbx",fbx,"fby",fby,"fbz",fbz)
   #print(Bx,By)
-
-
+end_time3 = time.time()-end_time2
+print("simulation complete!",f"Total Time Taken: {end_time3/60:.2f}", "minutes", f"Hours: {(end_time3)/(60**2):.2f}", 
+      "Now plotting")
 
 
 
@@ -283,4 +301,4 @@ ax.set_xlim(-R_domain, R_domain)
 ax.set_ylim(-R_domain, R_domain)
 
 plt.show()
-
+print("Program Success!!",f"Total Time Taken: {time.time()/60**2} Hours", f"Final Plotting time take: {(time.time()-end_time3)/60} Minutes")
