@@ -5,6 +5,7 @@ import scipy.constants as const
 import matplotlib.pyplot as plt
 import playsound
 from scipy import interpolate 
+import os
 
 start_time = time.time()
 mu_0 = 4 * np.pi * 1e-7
@@ -27,6 +28,7 @@ z_vals = np.linspace(0, L, N_seg, dtype=np.float32)
 Bx_total = np.memmap('Bx_total.dat', dtype='float32', mode='w+', shape=(x_vals.size, y_vals.size, z_vals.size))
 By_total = np.memmap('By_total.dat', dtype='float32', mode='w+', shape=(x_vals.size, y_vals.size, z_vals.size))
 Bz_total = np.memmap('Bz_total.dat', dtype='float32', mode='w+', shape=(x_vals.size, y_vals.size, z_vals.size))
+print("Bx_total.dat exists?", os.path.exists('Bx_total.dat'))
 
 # Precompute wire geometry
 z_wire = np.linspace(0.0, L, N_seg+1, dtype=np.float32)
@@ -214,7 +216,7 @@ plt.axline((0, 0), slope=-1, color='red', linestyle=':')
 end_time2 = time.time()-end_time1
 print("Simulation Complete",f"Time taken: {end_time2/60:.2f}", "minutes", f"Hours: {(end_time1)/(60**2):.2f}")
 playsound.playsound("C:/Users/enzoa/Music/calm alarm.wav")
-plt.show()
+plt.show(block=False)
 
 #Part 2: Send particle flying upward
 
