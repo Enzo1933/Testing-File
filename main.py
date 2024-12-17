@@ -12,7 +12,7 @@ mu_0 = 4 * np.pi * 1e-7
 
 # Example parameters
 n = 50        # number of wires
-I = 250.0     # current in each wire, amps
+I = 500000    # current in each wire, amps
 L = 0.6096   # wire length along z
 R = 0.08     # radius at which wires are placed
 R_domain = .076 #Accelerator Radius
@@ -288,8 +288,9 @@ while z_pos <= L:
     #     break
     #print("fbx",fbx,"fby",fby,"fbz",fbz)
   #print(Bx,By)
+time_3= time.time()
 end_time3 = time.time()-end_time2
-print("simulation complete!",f"Total Time Taken: {end_time3/60:.2f}", "minutes", f"Hours: {(end_time3)/(60**2):.2f}", 
+print("simulation complete!",f"Total Time Taken: {end_time3/60}", "minutes", f"Hours: {(end_time3)/(60**2)}", 
       "Now plotting")
 
 
@@ -315,4 +316,4 @@ ax.set_xlim(-R_domain, R_domain)
 ax.set_ylim(-R_domain, R_domain)
 plt.savefig('3D Particle Trajectory')
 plt.show()
-print("Program Success!!",f"Total Time Taken: {time.time()/60**2} Hours", f"Final Plotting time take: {(time.time()-end_time3)/60} Minutes")
+print("Program Success!!",f"Total Time Taken: {(time.time()-start_time)/60**2} Hours", f"Final Plotting time take: {(time.time()-time_3)/60} Minutes")
