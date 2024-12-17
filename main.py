@@ -75,9 +75,11 @@ y_size = y_vals.size
 z_size = z_vals.size
 # Logging setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
-total_steps = n * (z_size // chunk_size_z)
-step_counter = 0
+current_step = 0
 last_logged_percent = -1  # Keeps track of the last percentage reported
+num_z_chunks = (z_size + chunk_size_z - 1) // chunk_size_z
+num_seg_batches = (N_seg + batch_size - 1) // batch_size
+total_computations = num_z_chunks * n * num_seg_batches
 # plt.scatter(x_mid_all,y_mid_all)
 # plt.show()
 print("Starting computation by z-chunks.", "Time:", time.time() - start_time)
@@ -139,7 +141,7 @@ for z_start in range(0, z_size, chunk_size_z):
             R_x = X_broadcast[:, :, :, None] - x_mid_batch_4D
             R_y = Y_broadcast[:, :, :, None] - y_mid_batch_4D
             R_z = Z_chunk_grid[:, :, :, None] - z_mid_batch_4D
-            
+           
             R_mag = np.sqrt(R_x**2 + R_y**2 + R_z**2)
             R_mag_cubed = R_mag**3
             
@@ -162,17 +164,25 @@ for z_start in range(0, z_size, chunk_size_z):
             Bx_chunk += Bx_wire_batch
             By_chunk += By_wire_batch
             Bz_chunk += Bz_wire_batch
+            current_step += 1
+            percent_complete = int((current_step / total_computations) * 100)
+            if percent_complete > last_logged_percent:
+                logging.info(f"Progress: {percent_complete}%")
+                last_logged_percent = percent_complete
     
     # Write this chunk back into the memory-mapped arrays
     Bx_total[:, :, z_start:z_end] = Bx_chunk
     By_total[:, :, z_start:z_end] = By_chunk
     Bz_total[:, :, z_start:z_end] = Bz_chunk
     # Update progress and print every 1%
-    step_counter += 1
-    percent_complete = int((step_counter / total_steps) * 100)
-    if percent_complete > last_logged_percent:
-        print(f"Progress: {percent_complete}%")
-        last_logged_percent = percent_complete
+    # step_counter += 1
+    # percent_complete = int((step_counter / total_steps) * 100)
+    # print(percent_complete)
+    # print(3)
+    # if percent_complete > last_logged_percent:
+    #     #print(f"Progress: {percent_complete}%")
+    #     logging.info(f"Progress: {percent_complete}%")
+    #     last_logged_percent = percent_complete
 end_time1 = time.time() - start_time
 print("B Field Created!", "Time Taken:", (end_time1)/60, "minutes")
 B_magnitude= np.sqrt(Bx_total**2+By_total**2+Bz_total**2)
