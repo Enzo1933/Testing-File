@@ -287,8 +287,9 @@ plt.figure(figsize=(8, 6))
 plt.plot(r_pos, z_pos_list, marker='o', linestyle='-')
 plt.xlabel("Radius (m)")
 plt.ylabel("Z-position (m)")
-plt.title("Particle Trajectory in Accelerator")
+plt.title("Radial Particle Trajectory in Accelerator")
 plt.grid(True)
+plt.savefig('R-Z Trajectory')
 plt.show(block=False)
 
 
@@ -301,6 +302,6 @@ ax.set_zlabel('Z Position (m)')
 ax.set_title('3D Particle Trajectory')
 ax.set_xlim(-R_domain, R_domain)
 ax.set_ylim(-R_domain, R_domain)
-
+plt.savefig('3D Particle Trajectory')
 plt.show()
 print("Program Success!!",f"Total Time Taken: {time.time()/60**2} Hours", f"Final Plotting time take: {(time.time()-end_time3)/60} Minutes")
