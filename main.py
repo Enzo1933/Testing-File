@@ -244,8 +244,7 @@ dt=10**-9
 #r_pos=np.sqrt(x_pos**2+y_pos**2) #radial position -- this is what we care about
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 total_steps = n * (z_size // chunk_size_z)
-step_counter = 0
-last_logged_percent = 0
+last_logged_percent = -1
 print("Particle is Now Flying") 
 while z_pos <= L:
     r_pos.append(r)
