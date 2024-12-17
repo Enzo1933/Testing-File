@@ -235,7 +235,8 @@ dt=10**-9
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 total_steps = n * (z_size // chunk_size_z)
 step_counter = 0
-last_logged_percent = -1 
+last_logged_percent = 0
+print("Particle is Now Flying") 
 while z_pos <= L:
     r_pos.append(r)
     z_pos_list.append(z_pos)
@@ -265,6 +266,7 @@ while z_pos <= L:
     y_pos += vy * dt
     z_pos += vz * dt
     r = np.sqrt(x_pos**2 + y_pos**2)
+    percent_complete= int(z_pos*100/(L))
     if percent_complete > last_logged_percent:
         print(f"Progress: {percent_complete}%")
         last_logged_percent = percent_complete
